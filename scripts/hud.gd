@@ -57,6 +57,7 @@ var hp_inner_panel: Control
 var top_pop_pill: PanelContainer
 var top_wave_pill: PanelContainer
 var top_rp_pill: PanelContainer
+var wave_title_lbl: Label
 
 # Pie chart (read-only)
 var pie_chart: Control
@@ -399,6 +400,7 @@ func _build_top_bar() -> void:
 	wave_h.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	wave_h.add_child(_icon_tex("swords_s", ICON_SIZE_TOP))
 	var wave_title := _make_lbl("WAVE", 10, TEXT_DIM)
+	wave_title_lbl = wave_title
 	wave_h.add_child(wave_title)
 	wave_lbl = _make_lbl("0", 13, C_RED)
 	wave_h.add_child(wave_lbl)
@@ -1832,7 +1834,9 @@ func _apply_responsive_layout() -> void:
 	if top_rp_pill:
 		top_rp_pill.visible = true
 	if top_wave_pill:
-		top_wave_pill.visible = not portrait
+		top_wave_pill.visible = true
+	if wave_title_lbl:
+		wave_title_lbl.text = "W" if portrait else "WAVE"
 	if hp_outer_panel:
 		hp_outer_panel.custom_minimum_size = Vector2(98, 18) if portrait else Vector2(140, 20)
 	if hp_inner_panel:
@@ -1850,7 +1854,7 @@ func _apply_responsive_layout() -> void:
 	if res_gold_lbl:
 		res_gold_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
 	if res_research_lbl:
-		res_research_lbl.add_theme_font_size_override("font_size", 10 if portrait else 13)
+		res_research_lbl.add_theme_font_size_override("font_size", 9 if portrait else 13)
 	if pop_lbl:
 		pop_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
 	if wave_lbl:
@@ -2004,7 +2008,13 @@ func update_resources() -> void:
 	if res_wood_lbl: res_wood_lbl.text = str(res["wood"])
 	if res_stone_lbl: res_stone_lbl.text = str(res["stone"])
 	if res_gold_lbl: res_gold_lbl.text = str(res["gold"])
-	if res_research_lbl: res_research_lbl.text = "RP %d" % int(res.get("research", 0))
+	if res_research_lbl:
+		var vp_size := get_viewport().get_visible_rect().size
+		var portrait := vp_size.y > vp_size.x
+		if portrait:
+			res_research_lbl.text = "R%d" % int(res.get("research", 0))
+		else:
+			res_research_lbl.text = "RP %d" % int(res.get("research", 0))
 	# Per-minute rates
 	_update_rate_lbl(rate_wood_lbl, "wood")
 	_update_rate_lbl(rate_stone_lbl, "stone")

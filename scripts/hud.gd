@@ -199,7 +199,6 @@ func _ready() -> void:
 	_build_settings_toggle()
 	_build_settings_panel()
 	_build_minimap()
-	_build_corner_hammer()
 	wave_warn_lbl = _make_lbl("", 12, Color(1.0, 0.3, 0.3))
 	wave_warn_lbl.visible = false
 	wave_warn_lbl.z_index = 200
@@ -422,8 +421,8 @@ func _build_top_bar() -> void:
 
 	# Settings gear button pinned to the right edge of the top bar.
 	settings_toggle_btn = Button.new()
-	settings_toggle_btn.text = "\u2699"
-	settings_toggle_btn.add_theme_font_size_override("font_size", 20)
+	settings_toggle_btn.text = "SET"
+	settings_toggle_btn.add_theme_font_size_override("font_size", 12)
 	settings_toggle_btn.custom_minimum_size = Vector2(36, 36)
 	settings_toggle_btn.anchor_left = 1.0
 	settings_toggle_btn.anchor_right = 1.0
@@ -607,7 +606,7 @@ func _draw_pie() -> void:
 
 		# Draw percentage text
 		var font := ThemeDB.fallback_font
-		var font_size := 24
+		var font_size := int(clampf(radius * 0.22, 12.0, 18.0))
 		var txt := "%d%%" % pct
 		var txt_size := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
 		pie_chart.draw_string(font, label_pos - txt_size * 0.5 + Vector2(0, txt_size.y * 0.5), txt, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(1, 1, 1, 0.95))
@@ -624,7 +623,7 @@ func _draw_pie() -> void:
 			GameConfig.Role.MINER: icon_name = "c_pick"
 		if icons.has(icon_name):
 			var icon_pos := center + Vector2(cos(mid_angle), sin(mid_angle)) * (radius * 0.35)
-			var icon_sz := maxf(20.0, radius * 0.26)
+			var icon_sz := maxf(14.0, radius * 0.20)
 			var icon_rect := Rect2(icon_pos - Vector2(icon_sz, icon_sz) * 0.5, Vector2(icon_sz, icon_sz))
 			pie_chart.draw_texture_rect(icons[icon_name], icon_rect, false)
 
@@ -1192,6 +1191,7 @@ func _build_minimap() -> void:
 
 
 func _build_corner_hammer() -> void:
+	return
 	var frame := PanelContainer.new()
 	frame.name = "HammerCorner"
 	hammer_corner = frame
@@ -1813,14 +1813,14 @@ func _apply_responsive_layout() -> void:
 	if settings_toggle_btn:
 		if portrait:
 			settings_toggle_btn.custom_minimum_size = Vector2(30, 30)
-			settings_toggle_btn.add_theme_font_size_override("font_size", 16)
+			settings_toggle_btn.add_theme_font_size_override("font_size", 10)
 			settings_toggle_btn.offset_left = -38
 			settings_toggle_btn.offset_right = -6
 			settings_toggle_btn.offset_top = 8
 			settings_toggle_btn.offset_bottom = 40
 		else:
 			settings_toggle_btn.custom_minimum_size = Vector2(36, 36)
-			settings_toggle_btn.add_theme_font_size_override("font_size", 20)
+			settings_toggle_btn.add_theme_font_size_override("font_size", 12)
 			settings_toggle_btn.offset_left = -42
 			settings_toggle_btn.offset_right = -6
 			settings_toggle_btn.offset_top = 8
@@ -1830,9 +1830,9 @@ func _apply_responsive_layout() -> void:
 	if top_pop_pill:
 		top_pop_pill.visible = not portrait
 	if top_rp_pill:
-		top_rp_pill.visible = not portrait
+		top_rp_pill.visible = true
 	if top_wave_pill:
-		top_wave_pill.visible = true
+		top_wave_pill.visible = not portrait
 	if hp_outer_panel:
 		hp_outer_panel.custom_minimum_size = Vector2(98, 18) if portrait else Vector2(140, 20)
 	if hp_inner_panel:
@@ -1879,6 +1879,26 @@ func _apply_responsive_layout() -> void:
 	if left_panel_root:
 		left_panel_root.add_theme_constant_override("separation", 4 if portrait else 6)
 
+	if left_quest_btn:
+		if portrait:
+			left_quest_btn.custom_minimum_size = Vector2(0, 52)
+			left_quest_btn.add_theme_font_size_override("font_size", 9)
+			left_quest_btn.add_theme_constant_override("icon_max_width", 16)
+		else:
+			left_quest_btn.custom_minimum_size = Vector2(112, 80)
+			left_quest_btn.add_theme_font_size_override("font_size", 11)
+			left_quest_btn.add_theme_constant_override("icon_max_width", 24)
+
+	if left_call_btn:
+		if portrait:
+			left_call_btn.custom_minimum_size = Vector2(0, 52)
+			left_call_btn.add_theme_font_size_override("font_size", 9)
+			left_call_btn.add_theme_constant_override("icon_max_width", 16)
+		else:
+			left_call_btn.custom_minimum_size = Vector2(112, 80)
+			left_call_btn.add_theme_font_size_override("font_size", 11)
+			left_call_btn.add_theme_constant_override("icon_max_width", 28)
+
 	if left_pie_wrap:
 		if portrait:
 			left_pie_wrap.custom_minimum_size = Vector2(0, 88)
@@ -1915,16 +1935,7 @@ func _apply_responsive_layout() -> void:
 			minimap_wrap.offset_bottom = 216
 
 	if hammer_corner:
-		if portrait:
-			hammer_corner.offset_left = 8
-			hammer_corner.offset_right = 84
-			hammer_corner.offset_top = -170
-			hammer_corner.offset_bottom = -94
-		else:
-			hammer_corner.offset_left = 8
-			hammer_corner.offset_right = 84
-			hammer_corner.offset_top = -86
-			hammer_corner.offset_bottom = -10
+		hammer_corner.visible = false
 
 
 # ╔══════════════════════════════════════════════════════════╗

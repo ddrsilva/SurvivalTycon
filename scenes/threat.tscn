@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/threat.gd" id="1"]
+
+[node name="Threat" type="Node2D"]
+z_index = 10
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="HPBarBG" type="ColorRect" parent="."]
+offset_left = -10.0
+offset_top = -14.0
+offset_right = 10.0
+offset_bottom = -11.0
+color = Color(0.2, 0.2, 0.2, 0.8)
+
+[node name="HPBar" type="ColorRect" parent="."]
+offset_left = -9.0
+offset_top = -13.5
+offset_right = 9.0
+offset_bottom = -11.5
+color = Color(0, 1, 0, 1)

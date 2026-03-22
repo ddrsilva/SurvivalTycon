@@ -1,0 +1,19 @@
+# Godot
+.import/
+.godot/
+export_presets.cfg
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Build artifacts
+*.apk
+*.ipa
+*.exe
+*.pck
+*.tmp
+
+# Local plugin/download leftovers
+xogot_connect-*.zip

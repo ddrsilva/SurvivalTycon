@@ -46,6 +46,9 @@ var upgrade_content_wrap: Control
 var build_cards_grid: GridContainer
 var research_content: VBoxContainer
 var upgrade_content: VBoxContainer
+var top_bar: Panel
+var minimap_wrap: Control
+var hammer_corner: PanelContainer
 
 # Pie chart (read-only)
 var pie_chart: Control
@@ -199,6 +202,8 @@ func _ready() -> void:
 	ResourceManager.research_changed.connect(_on_research_changed)
 	ResourceManager.tech_researched.connect(_on_tech_researched)
 	ResourceManager.tool_upgraded.connect(_on_tool_upgraded)
+	get_viewport().size_changed.connect(_on_viewport_size_changed)
+	_apply_responsive_layout()
 
 	update_resources()
 	update_tasks()
@@ -274,6 +279,7 @@ func _on_building_destroyed(_key: String, _bld_data: Dictionary) -> void:
 func _build_top_bar() -> void:
 	var bar := Panel.new()
 	bar.name = "TopBar"
+	top_bar = bar
 	bar.anchor_left = 0.0
 	bar.anchor_right = 1.0
 	bar.offset_top = 0
@@ -1148,6 +1154,7 @@ func _is_build_allowed_by_tutorial(building_key: String) -> bool:
 func _build_minimap() -> void:
 	var wrap := Control.new()
 	wrap.name = "MiniMapWrap"
+	minimap_wrap = wrap
 	wrap.anchor_left = 1.0
 	wrap.anchor_right = 1.0
 	wrap.anchor_top = 0.0
@@ -1167,6 +1174,7 @@ func _build_minimap() -> void:
 func _build_corner_hammer() -> void:
 	var frame := PanelContainer.new()
 	frame.name = "HammerCorner"
+	hammer_corner = frame
 	frame.anchor_left = 0.0
 	frame.anchor_right = 0.0
 	frame.anchor_top = 1.0
@@ -1749,6 +1757,72 @@ func _on_sfx_toggle() -> void:
 			_style_upgrade_btn(sfx_toggle_btn)
 		else:
 			_style_btn(sfx_toggle_btn, Color(0.4, 0.2, 0.2))
+
+
+func _on_viewport_size_changed() -> void:
+	_apply_responsive_layout()
+
+
+func _apply_responsive_layout() -> void:
+	var vp_size := get_viewport().get_visible_rect().size
+	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
+		return
+	var portrait := vp_size.y > vp_size.x
+
+	if top_bar:
+		top_bar.offset_bottom = 64 if portrait else 52
+
+	if left_panel:
+		if portrait:
+			var panel_w := clampf(vp_size.x * 0.56, 190.0, 320.0)
+			left_panel.offset_left = 6
+			left_panel.offset_right = 6 + panel_w
+			left_panel.offset_top = 72
+			left_panel.offset_bottom = -252
+		else:
+			left_panel.offset_left = 6
+			left_panel.offset_right = 256
+			left_panel.offset_top = 62
+			left_panel.offset_bottom = -228
+
+	if build_panel:
+		if portrait:
+			build_panel.offset_left = 8
+			build_panel.offset_right = -8
+			build_panel.offset_top = -246
+			build_panel.offset_bottom = -8
+		else:
+			build_panel.offset_left = 268
+			build_panel.offset_right = -184
+			build_panel.offset_top = -196
+			build_panel.offset_bottom = -10
+
+	if build_cards_grid:
+		build_cards_grid.columns = 1 if portrait else 2
+
+	if minimap_wrap:
+		if portrait:
+			minimap_wrap.offset_left = -146
+			minimap_wrap.offset_right = -8
+			minimap_wrap.offset_top = 72
+			minimap_wrap.offset_bottom = 210
+		else:
+			minimap_wrap.offset_left = -170
+			minimap_wrap.offset_right = -12
+			minimap_wrap.offset_top = 58
+			minimap_wrap.offset_bottom = 216
+
+	if hammer_corner:
+		if portrait:
+			hammer_corner.offset_left = 8
+			hammer_corner.offset_right = 84
+			hammer_corner.offset_top = -170
+			hammer_corner.offset_bottom = -94
+		else:
+			hammer_corner.offset_left = 8
+			hammer_corner.offset_right = 84
+			hammer_corner.offset_top = -86
+			hammer_corner.offset_bottom = -10
 
 
 # ╔══════════════════════════════════════════════════════════╗

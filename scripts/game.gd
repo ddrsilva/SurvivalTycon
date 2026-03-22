@@ -88,6 +88,13 @@ const DAY_NIGHT_CYCLE_SECONDS := 160.0
 const FIRE_BURN_DURATION := 3.4
 const BUILDER_CONSTRUCT_RATE := 1.0
 const NON_BUILDER_CONSTRUCT_RATE := 0.15
+const CAMERA_ZOOM_MIN := 0.35
+const CAMERA_ZOOM_MAX := 4.0
+
+var touch_points: Dictionary = {}
+var pinch_active: bool = false
+var pinch_start_distance: float = 0.0
+var pinch_start_zoom: float = 1.9
 
 
 func _ready() -> void:
@@ -592,6 +599,35 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touch_points[event.index] = event.position
+		else:
+			touch_points.erase(event.index)
+		if touch_points.size() >= 2:
+			_update_pinch_reference()
+			is_dragging_camera = false
+		elif touch_points.is_empty():
+			_reset_pinch_state()
+		return
+
+	if event is InputEventScreenDrag:
+		touch_points[event.index] = event.position
+		if touch_points.size() >= 2:
+			if not pinch_active or pinch_start_distance <= 0.0:
+				_update_pinch_reference()
+			var points: Array = touch_points.values()
+			var p0: Vector2 = points[0]
+			var p1: Vector2 = points[1]
+			var current_distance := maxf(p0.distance_to(p1), 1.0)
+			var target_zoom := pinch_start_zoom * (pinch_start_distance / current_distance)
+			_set_camera_zoom_scalar(target_zoom)
+			return
+
+	if event is InputEventMagnifyGesture:
+		_set_camera_zoom_scalar(camera.zoom.x / maxf(event.factor, 0.01))
+		return
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if active_manual_building_key != "":
 			_place_manual_defense_at_mouse()
@@ -606,11 +642,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				drag_anchor_world = get_global_mouse_position()
 		# Scroll to zoom
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			camera.zoom = camera.zoom * 1.1
-			camera.zoom = camera.zoom.clamp(Vector2(0.35, 0.35), Vector2(4.0, 4.0))
+			_set_camera_zoom_scalar(camera.zoom.x * 1.1)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			camera.zoom = camera.zoom * 0.9
-			camera.zoom = camera.zoom.clamp(Vector2(0.35, 0.35), Vector2(4.0, 4.0))
+			_set_camera_zoom_scalar(camera.zoom.x * 0.9)
 	elif event is InputEventMouseMotion and is_dragging_camera:
 		var current_world := get_global_mouse_position()
 		camera.position += drag_anchor_world - current_world
@@ -625,6 +659,29 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_MIDDLE:
 			is_dragging_camera = false
+
+
+func _set_camera_zoom_scalar(value: float) -> void:
+	var clamped := clampf(value, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
+	camera.zoom = Vector2(clamped, clamped)
+	_clamp_camera_to_world()
+
+
+func _reset_pinch_state() -> void:
+	pinch_active = false
+	pinch_start_distance = 0.0
+
+
+func _update_pinch_reference() -> void:
+	if touch_points.size() < 2:
+		_reset_pinch_state()
+		return
+	var points: Array = touch_points.values()
+	var p0: Vector2 = points[0]
+	var p1: Vector2 = points[1]
+	pinch_start_distance = maxf(p0.distance_to(p1), 1.0)
+	pinch_start_zoom = camera.zoom.x
+	pinch_active = true
 
 
 func _select_entity_at_mouse() -> void:

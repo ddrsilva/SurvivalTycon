@@ -32,6 +32,8 @@ var game_over_panel: Control
 var stage_lbl: Label
 var evolve_btn: Button
 var left_panel: PanelContainer
+var left_panel_toggle_btn: Button
+var left_panel_visible: bool = true
 var left_quest_btn: Button
 var left_call_btn: Button
 var selected_villager_lbl: Label
@@ -194,6 +196,7 @@ func _ready() -> void:
 	_load_icons()
 	_build_top_bar()
 	_build_left_panel()
+	_build_left_panel_toggle()
 	_build_build_panel()
 	_build_upgrade_toggle()
 	_build_upgrade_panel()
@@ -554,6 +557,44 @@ func _build_left_panel() -> void:
 
 	left_panel.add_child(root)
 	add_child(left_panel)
+
+
+func _build_left_panel_toggle() -> void:
+	left_panel_toggle_btn = Button.new()
+	left_panel_toggle_btn.name = "LeftPanelToggle"
+	left_panel_toggle_btn.anchor_left = 0.0
+	left_panel_toggle_btn.anchor_right = 0.0
+	left_panel_toggle_btn.anchor_top = 0.0
+	left_panel_toggle_btn.anchor_bottom = 0.0
+	left_panel_toggle_btn.custom_minimum_size = Vector2(26, 30)
+	left_panel_toggle_btn.add_theme_font_size_override("font_size", 12)
+	left_panel_toggle_btn.text = "<"
+	_style_btn(left_panel_toggle_btn, Color(0.24, 0.22, 0.18, 0.95))
+	left_panel_toggle_btn.pressed.connect(_toggle_left_panel)
+	add_child(left_panel_toggle_btn)
+
+
+func _toggle_left_panel() -> void:
+	left_panel_visible = not left_panel_visible
+	if left_panel:
+		left_panel.visible = left_panel_visible
+	if left_panel_toggle_btn:
+		left_panel_toggle_btn.text = "<" if left_panel_visible else ">"
+	_sync_left_panel_toggle_position()
+
+
+func _sync_left_panel_toggle_position() -> void:
+	if not left_panel_toggle_btn:
+		return
+	var x := 6.0
+	var y := 76.0
+	if left_panel and left_panel_visible:
+		x = left_panel.offset_right + 4.0
+		y = left_panel.offset_top + 4.0
+	left_panel_toggle_btn.offset_left = x
+	left_panel_toggle_btn.offset_right = x + 26.0
+	left_panel_toggle_btn.offset_top = y
+	left_panel_toggle_btn.offset_bottom = y + 30.0
 
 
 # ╔══════════════════════════════════════════════════════════╗
@@ -1879,6 +1920,15 @@ func _apply_responsive_layout() -> void:
 			left_panel.offset_right = 256
 			left_panel.offset_top = 62
 			left_panel.offset_bottom = -228
+		left_panel.visible = left_panel_visible
+
+	if left_panel_toggle_btn:
+		if portrait:
+			left_panel_toggle_btn.custom_minimum_size = Vector2(24, 28)
+			left_panel_toggle_btn.add_theme_font_size_override("font_size", 11)
+		else:
+			left_panel_toggle_btn.custom_minimum_size = Vector2(26, 30)
+			left_panel_toggle_btn.add_theme_font_size_override("font_size", 12)
 
 	if left_panel_root:
 		left_panel_root.add_theme_constant_override("separation", 4 if portrait else 6)
@@ -1940,6 +1990,8 @@ func _apply_responsive_layout() -> void:
 
 	if hammer_corner:
 		hammer_corner.visible = false
+
+	_sync_left_panel_toggle_position()
 
 
 # ╔══════════════════════════════════════════════════════════╗

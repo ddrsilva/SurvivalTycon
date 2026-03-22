@@ -624,13 +624,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			var p1: Vector2 = pair[1]
 			var current_distance := maxf(p0.distance_to(p1), 1.0)
 			if pinch_last_distance > 0.0:
-				var zoom_factor := pinch_last_distance / current_distance
+				var zoom_factor := current_distance / pinch_last_distance
 				_set_camera_zoom_scalar(camera.zoom.x * zoom_factor)
 			pinch_last_distance = current_distance
 			return
 
 	if event is InputEventMagnifyGesture:
-		_set_camera_zoom_scalar(camera.zoom.x / maxf(event.factor, 0.01))
+		_set_camera_zoom_scalar(camera.zoom.x * maxf(event.factor, 0.01))
 		return
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

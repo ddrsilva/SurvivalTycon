@@ -92,6 +92,7 @@ const CAMERA_ZOOM_MIN := 0.35
 const CAMERA_ZOOM_MAX := 4.0
 
 var touch_points: Dictionary = {}
+var touch_last_drag_time: Dictionary = {}
 var pinch_active: bool = false
 var pinch_start_distance: float = 0.0
 var pinch_start_zoom: float = 1.9
@@ -605,6 +606,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			touch_points[event.index] = event.position
 		else:
 			touch_points.erase(event.index)
+			touch_last_drag_time.erase(event.index)
 		if touch_points.size() >= 2:
 			_update_pinch_reference()
 			is_dragging_camera = false
@@ -614,19 +616,29 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventScreenDrag:
 		touch_points[event.index] = event.position
+		var now := Time.get_ticks_msec() * 0.001
+		touch_last_drag_time[event.index] = now
 		if touch_points.size() >= 2:
+			var pair_ids := _get_primary_touch_pair_ids()
+			if pair_ids.size() < 2:
+				return
+			if not _is_active_pinch_pair(pair_ids, now):
+				camera.position -= event.relative * camera.zoom.x
+				_clamp_camera_to_world()
+				return
 			if not pinch_active or pinch_start_distance <= 0.0:
 				_update_pinch_reference()
-			var pair := _get_primary_touch_pair()
-			if pair.size() < 2:
-				return
-			var p0: Vector2 = pair[0]
-			var p1: Vector2 = pair[1]
+			var p0: Vector2 = touch_points[pair_ids[0]]
+			var p1: Vector2 = touch_points[pair_ids[1]]
 			var current_distance := maxf(p0.distance_to(p1), 1.0)
 			if pinch_last_distance > 0.0:
 				var zoom_factor := current_distance / pinch_last_distance
 				_set_camera_zoom_scalar(camera.zoom.x * zoom_factor)
 			pinch_last_distance = current_distance
+			return
+		elif touch_points.size() == 1:
+			camera.position -= event.relative * camera.zoom.x
+			_clamp_camera_to_world()
 			return
 
 	if event is InputEventMagnifyGesture:
@@ -700,6 +712,22 @@ func _get_primary_touch_pair() -> Array:
 	if ids.size() < 2:
 		return []
 	return [touch_points[ids[0]], touch_points[ids[1]]]
+
+
+func _get_primary_touch_pair_ids() -> Array:
+	var ids: Array = touch_points.keys()
+	ids.sort()
+	if ids.size() < 2:
+		return []
+	return [ids[0], ids[1]]
+
+
+func _is_active_pinch_pair(pair_ids: Array, now: float) -> bool:
+	if pair_ids.size() < 2:
+		return false
+	var t0: float = float(touch_last_drag_time.get(pair_ids[0], -999.0))
+	var t1: float = float(touch_last_drag_time.get(pair_ids[1], -999.0))
+	return (now - t0) <= 0.16 and (now - t1) <= 0.16
 
 
 func _select_entity_at_mouse() -> void:

@@ -754,6 +754,7 @@ func _build_build_panel() -> void:
 
 	build_cards_grid = GridContainer.new()
 	build_cards_grid.columns = 2
+	build_cards_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	build_cards_grid.add_theme_constant_override("h_separation", 8)
 	build_cards_grid.add_theme_constant_override("v_separation", 6)
 
@@ -840,6 +841,7 @@ func _build_build_panel() -> void:
 
 	research_content = VBoxContainer.new()
 	research_content.visible = false
+	research_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	research_content.add_theme_constant_override("separation", 6)
 	var r_title := _make_lbl("RESEARCH PROJECTS", 13, TEXT_W)
 	research_content.add_child(r_title)
@@ -847,8 +849,10 @@ func _build_build_panel() -> void:
 		var tech_key: String = key
 		var info: Dictionary = GameConfig.TECHNOLOGIES[tech_key]
 		var card := PanelContainer.new()
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_theme_stylebox_override("panel", _sb(BG_CARD, 8, 8, 8, 8))
 		var row := HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_theme_constant_override("separation", 8)
 		row.add_child(_icon_tex("arrow", 20))
 		var name_lbl := _make_lbl(String(info.get("name", tech_key.capitalize())), 11, TEXT_W)
@@ -865,6 +869,8 @@ func _build_build_panel() -> void:
 		research_progress_bars[tech_key] = pbar
 		row.add_child(pbar)
 		var val_lbl := _make_lbl("0/0", 10, TEXT_COST)
+		val_lbl.custom_minimum_size = Vector2(48, 0)
+		val_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		research_labels[tech_key] = val_lbl
 		row.add_child(val_lbl)
 		var btn := Button.new()
@@ -950,7 +956,7 @@ func _show_build_tab(tab: String) -> void:
 
 func _make_build_btn(label_text: String, icon_name: String, building_key: String) -> Array:
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(186, 0)
+	card.custom_minimum_size = Vector2(0, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.add_theme_stylebox_override("panel", _sb(BG_CARD, R_BTN, R_BTN, R_BTN, R_BTN))
 

@@ -750,6 +750,7 @@ func _build_build_panel() -> void:
 	build_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	build_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	build_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	build_scroll.scroll_deadzone = 0
 	build_content_wrap = build_scroll
 
 	build_cards_grid = GridContainer.new()
@@ -837,6 +838,7 @@ func _build_build_panel() -> void:
 	research_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	research_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	research_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	research_scroll.scroll_deadzone = 0
 	research_content_wrap = research_scroll
 
 	research_content = VBoxContainer.new()
@@ -850,9 +852,11 @@ func _build_build_panel() -> void:
 		var info: Dictionary = GameConfig.TECHNOLOGIES[tech_key]
 		var card := PanelContainer.new()
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_theme_stylebox_override("panel", _sb(BG_CARD, 8, 8, 8, 8))
 		var row := HBoxContainer.new()
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_theme_constant_override("separation", 8)
 		row.add_child(_icon_tex("arrow", 20))
 		var name_lbl := _make_lbl(String(info.get("name", tech_key.capitalize())), 11, TEXT_W)
@@ -895,6 +899,7 @@ func _build_build_panel() -> void:
 	upgrade_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	upgrade_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	upgrade_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	upgrade_scroll.scroll_deadzone = 0
 	upgrade_content_wrap = upgrade_scroll
 
 	upgrade_content = VBoxContainer.new()
@@ -958,9 +963,11 @@ func _make_build_btn(label_text: String, icon_name: String, building_key: String
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(0, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_theme_stylebox_override("panel", _sb(BG_CARD, R_BTN, R_BTN, R_BTN, R_BTN))
 
 	var hbox := HBoxContainer.new()
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_theme_constant_override("separation", 6)
 
 	hbox.add_child(_icon_tex(icon_name, 24))
@@ -968,6 +975,7 @@ func _make_build_btn(label_text: String, icon_name: String, building_key: String
 	var info_vbox := VBoxContainer.new()
 	info_vbox.add_theme_constant_override("separation", 1)
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var name_lbl := _make_lbl(label_text, 11, TEXT_W)
 	info_vbox.add_child(name_lbl)
@@ -1649,13 +1657,16 @@ func _make_upgrade_card(icon_name: String, tool_type: String) -> Array:
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(140, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_theme_stylebox_override("panel", _sb(BG_CARD, R_BTN, R_BTN, R_BTN, R_BTN))
 
 	var vbox := VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_theme_constant_override("separation", 4)
 
 	# Icon + name row
 	var top_row := HBoxContainer.new()
+	top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top_row.add_theme_constant_override("separation", 6)
 	top_row.add_child(_icon_tex(icon_name, ICON_SIZE_UPGRADE))
 

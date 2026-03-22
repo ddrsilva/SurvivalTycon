@@ -852,10 +852,13 @@ func _build_build_panel() -> void:
 		row.add_theme_constant_override("separation", 8)
 		row.add_child(_icon_tex("arrow", 20))
 		var name_lbl := _make_lbl(String(info.get("name", tech_key.capitalize())), 11, TEXT_W)
-		name_lbl.custom_minimum_size = Vector2(136, 0)
+		name_lbl.custom_minimum_size = Vector2(78, 0)
+		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(name_lbl)
 		var pbar := ProgressBar.new()
-		pbar.custom_minimum_size = Vector2(170, 18)
+		pbar.custom_minimum_size = Vector2(90, 18)
+		pbar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		pbar.min_value = 0
 		pbar.max_value = 100
 		pbar.show_percentage = false
@@ -866,7 +869,7 @@ func _build_build_panel() -> void:
 		row.add_child(val_lbl)
 		var btn := Button.new()
 		btn.text = "RESEARCH"
-		btn.custom_minimum_size = Vector2(100, 28)
+		btn.custom_minimum_size = Vector2(74, 28)
 		_style_upgrade_btn(btn)
 		btn.pressed.connect(func():
 			ResourceManager.research_technology(tech_key)

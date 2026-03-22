@@ -50,6 +50,13 @@ var top_bar: Panel
 var top_bar_hbox: HBoxContainer
 var minimap_wrap: Control
 var hammer_corner: PanelContainer
+var left_panel_root: VBoxContainer
+var left_pie_wrap: Control
+var hp_outer_panel: PanelContainer
+var hp_inner_panel: Control
+var top_pop_pill: PanelContainer
+var top_wave_pill: PanelContainer
+var top_rp_pill: PanelContainer
 
 # Pie chart (read-only)
 var pie_chart: Control
@@ -351,10 +358,12 @@ func _build_top_bar() -> void:
 	hp_box.add_theme_constant_override("separation", -1)
 	hp_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var hp_outer := PanelContainer.new()
+	hp_outer_panel = hp_outer
 	hp_outer.custom_minimum_size = Vector2(140, 20)
 	hp_outer.add_theme_stylebox_override("panel", _sb(C_HP_BG, 5, 5, 5, 5))
 	hp_outer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var hp_inner := Control.new()
+	hp_inner_panel = hp_inner
 	hp_inner.custom_minimum_size = Vector2(110, 14)
 	hp_inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hp_bar_fill = ColorRect.new()
@@ -373,6 +382,7 @@ func _build_top_bar() -> void:
 
 	# Population pill
 	var pop_pill := _top_pill()
+	top_pop_pill = pop_pill
 	var pop_h := HBoxContainer.new()
 	pop_h.add_theme_constant_override("separation", 4)
 	pop_h.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -384,6 +394,7 @@ func _build_top_bar() -> void:
 
 	# Wave pill
 	var wave_pill := _top_pill()
+	top_wave_pill = wave_pill
 	var wave_h := HBoxContainer.new()
 	wave_h.add_theme_constant_override("separation", 4)
 	wave_h.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -397,6 +408,7 @@ func _build_top_bar() -> void:
 
 	# RP pill
 	var rp_pill := _top_pill()
+	top_rp_pill = rp_pill
 	var rp_h := HBoxContainer.new()
 	rp_h.add_theme_constant_override("separation", 4)
 	rp_h.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -440,6 +452,7 @@ func _build_left_panel() -> void:
 	left_panel.add_theme_stylebox_override("panel", _sb(BG_PANEL, 14, 14, 14, 14))
 
 	var root := VBoxContainer.new()
+	left_panel_root = root
 	root.add_theme_constant_override("separation", 6)
 
 	var hero_row := HBoxContainer.new()
@@ -528,6 +541,7 @@ func _build_left_panel() -> void:
 	root.add_child(bld_card)
 
 	var pie_wrap := Control.new()
+	left_pie_wrap = pie_wrap
 	pie_wrap.custom_minimum_size = Vector2(0, 200)
 	pie_wrap.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	pie_chart = Control.new()
@@ -1784,7 +1798,17 @@ func _apply_responsive_layout() -> void:
 			top_bar.offset_bottom = 52
 
 	if top_bar_hbox:
-		top_bar_hbox.add_theme_constant_override("separation", 3 if portrait else 6)
+		top_bar_hbox.add_theme_constant_override("separation", 2 if portrait else 6)
+		if portrait:
+			top_bar_hbox.offset_left = 2
+			top_bar_hbox.offset_right = -40
+			top_bar_hbox.offset_top = 2
+			top_bar_hbox.offset_bottom = -2
+		else:
+			top_bar_hbox.offset_left = 4
+			top_bar_hbox.offset_right = -52
+			top_bar_hbox.offset_top = 2
+			top_bar_hbox.offset_bottom = -2
 
 	if settings_toggle_btn:
 		if portrait:
@@ -1803,6 +1827,16 @@ func _apply_responsive_layout() -> void:
 			settings_toggle_btn.offset_bottom = 44
 
 	# Compact top bar in portrait to avoid clipping on narrow mobile screens.
+	if top_pop_pill:
+		top_pop_pill.visible = not portrait
+	if top_rp_pill:
+		top_rp_pill.visible = not portrait
+	if top_wave_pill:
+		top_wave_pill.visible = true
+	if hp_outer_panel:
+		hp_outer_panel.custom_minimum_size = Vector2(98, 18) if portrait else Vector2(140, 20)
+	if hp_inner_panel:
+		hp_inner_panel.custom_minimum_size = Vector2(78, 12) if portrait else Vector2(110, 14)
 	if rate_wood_lbl:
 		rate_wood_lbl.visible = not portrait
 	if rate_stone_lbl:
@@ -1826,16 +1860,32 @@ func _apply_responsive_layout() -> void:
 
 	if left_panel:
 		if portrait:
-			var panel_w := clampf(vp_size.x * 0.42, 132.0, 196.0)
+			var panel_w := clampf(vp_size.x * 0.30, 118.0, 156.0)
+			var panel_h := clampf(vp_size.y * 0.34, 220.0, 290.0)
+			left_panel.anchor_top = 0.0
+			left_panel.anchor_bottom = 0.0
 			left_panel.offset_left = 6
 			left_panel.offset_right = 6 + panel_w
 			left_panel.offset_top = 70
-			left_panel.offset_bottom = -238
+			left_panel.offset_bottom = 70 + panel_h
 		else:
+			left_panel.anchor_top = 0.0
+			left_panel.anchor_bottom = 1.0
 			left_panel.offset_left = 6
 			left_panel.offset_right = 256
 			left_panel.offset_top = 62
 			left_panel.offset_bottom = -228
+
+	if left_panel_root:
+		left_panel_root.add_theme_constant_override("separation", 4 if portrait else 6)
+
+	if left_pie_wrap:
+		if portrait:
+			left_pie_wrap.custom_minimum_size = Vector2(0, 88)
+			left_pie_wrap.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		else:
+			left_pie_wrap.custom_minimum_size = Vector2(0, 200)
+			left_pie_wrap.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
 	if build_panel:
 		if portrait:
@@ -1850,7 +1900,7 @@ func _apply_responsive_layout() -> void:
 			build_panel.offset_bottom = -10
 
 	if build_cards_grid:
-		build_cards_grid.columns = 1 if portrait else 2
+		build_cards_grid.columns = 2
 
 	if minimap_wrap:
 		if portrait:

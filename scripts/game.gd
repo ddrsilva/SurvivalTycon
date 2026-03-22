@@ -95,6 +95,7 @@ var touch_points: Dictionary = {}
 var pinch_active: bool = false
 var pinch_start_distance: float = 0.0
 var pinch_start_zoom: float = 1.9
+var pinch_last_distance: float = 0.0
 
 
 func _ready() -> void:
@@ -607,7 +608,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if touch_points.size() >= 2:
 			_update_pinch_reference()
 			is_dragging_camera = false
-		elif touch_points.is_empty():
+		else:
 			_reset_pinch_state()
 		return
 
@@ -616,12 +617,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		if touch_points.size() >= 2:
 			if not pinch_active or pinch_start_distance <= 0.0:
 				_update_pinch_reference()
-			var points: Array = touch_points.values()
-			var p0: Vector2 = points[0]
-			var p1: Vector2 = points[1]
+			var pair := _get_primary_touch_pair()
+			if pair.size() < 2:
+				return
+			var p0: Vector2 = pair[0]
+			var p1: Vector2 = pair[1]
 			var current_distance := maxf(p0.distance_to(p1), 1.0)
-			var target_zoom := pinch_start_zoom * (pinch_start_distance / current_distance)
-			_set_camera_zoom_scalar(target_zoom)
+			if pinch_last_distance > 0.0:
+				var zoom_factor := pinch_last_distance / current_distance
+				_set_camera_zoom_scalar(camera.zoom.x * zoom_factor)
+			pinch_last_distance = current_distance
 			return
 
 	if event is InputEventMagnifyGesture:
@@ -670,18 +675,31 @@ func _set_camera_zoom_scalar(value: float) -> void:
 func _reset_pinch_state() -> void:
 	pinch_active = false
 	pinch_start_distance = 0.0
+	pinch_last_distance = 0.0
 
 
 func _update_pinch_reference() -> void:
 	if touch_points.size() < 2:
 		_reset_pinch_state()
 		return
-	var points: Array = touch_points.values()
-	var p0: Vector2 = points[0]
-	var p1: Vector2 = points[1]
+	var pair := _get_primary_touch_pair()
+	if pair.size() < 2:
+		_reset_pinch_state()
+		return
+	var p0: Vector2 = pair[0]
+	var p1: Vector2 = pair[1]
 	pinch_start_distance = maxf(p0.distance_to(p1), 1.0)
 	pinch_start_zoom = camera.zoom.x
+	pinch_last_distance = pinch_start_distance
 	pinch_active = true
+
+
+func _get_primary_touch_pair() -> Array:
+	var ids: Array = touch_points.keys()
+	ids.sort()
+	if ids.size() < 2:
+		return []
+	return [touch_points[ids[0]], touch_points[ids[1]]]
 
 
 func _select_entity_at_mouse() -> void:

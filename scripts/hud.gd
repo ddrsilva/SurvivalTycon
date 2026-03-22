@@ -47,6 +47,7 @@ var build_cards_grid: GridContainer
 var research_content: VBoxContainer
 var upgrade_content: VBoxContainer
 var top_bar: Panel
+var top_bar_hbox: HBoxContainer
 var minimap_wrap: Control
 var hammer_corner: PanelContainer
 
@@ -289,7 +290,12 @@ func _build_top_bar() -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var hbox := HBoxContainer.new()
+	top_bar_hbox = hbox
 	hbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	hbox.offset_left = 4
+	hbox.offset_right = -52
+	hbox.offset_top = 2
+	hbox.offset_bottom = -2
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 6)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1770,15 +1776,61 @@ func _apply_responsive_layout() -> void:
 	var portrait := vp_size.y > vp_size.x
 
 	if top_bar:
-		top_bar.offset_bottom = 64 if portrait else 52
+		if portrait:
+			top_bar.offset_top = 8
+			top_bar.offset_bottom = 62
+		else:
+			top_bar.offset_top = 0
+			top_bar.offset_bottom = 52
+
+	if top_bar_hbox:
+		top_bar_hbox.add_theme_constant_override("separation", 3 if portrait else 6)
+
+	if settings_toggle_btn:
+		if portrait:
+			settings_toggle_btn.custom_minimum_size = Vector2(30, 30)
+			settings_toggle_btn.add_theme_font_size_override("font_size", 16)
+			settings_toggle_btn.offset_left = -38
+			settings_toggle_btn.offset_right = -6
+			settings_toggle_btn.offset_top = 8
+			settings_toggle_btn.offset_bottom = 40
+		else:
+			settings_toggle_btn.custom_minimum_size = Vector2(36, 36)
+			settings_toggle_btn.add_theme_font_size_override("font_size", 20)
+			settings_toggle_btn.offset_left = -42
+			settings_toggle_btn.offset_right = -6
+			settings_toggle_btn.offset_top = 8
+			settings_toggle_btn.offset_bottom = 44
+
+	# Compact top bar in portrait to avoid clipping on narrow mobile screens.
+	if rate_wood_lbl:
+		rate_wood_lbl.visible = not portrait
+	if rate_stone_lbl:
+		rate_stone_lbl.visible = not portrait
+	if rate_gold_lbl:
+		rate_gold_lbl.visible = not portrait
+	if res_wood_lbl:
+		res_wood_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
+	if res_stone_lbl:
+		res_stone_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
+	if res_gold_lbl:
+		res_gold_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
+	if res_research_lbl:
+		res_research_lbl.add_theme_font_size_override("font_size", 10 if portrait else 13)
+	if pop_lbl:
+		pop_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
+	if wave_lbl:
+		wave_lbl.add_theme_font_size_override("font_size", 11 if portrait else 13)
+	if hp_label:
+		hp_label.add_theme_font_size_override("font_size", 9 if portrait else 10)
 
 	if left_panel:
 		if portrait:
-			var panel_w := clampf(vp_size.x * 0.56, 190.0, 320.0)
+			var panel_w := clampf(vp_size.x * 0.42, 132.0, 196.0)
 			left_panel.offset_left = 6
 			left_panel.offset_right = 6 + panel_w
-			left_panel.offset_top = 72
-			left_panel.offset_bottom = -252
+			left_panel.offset_top = 70
+			left_panel.offset_bottom = -238
 		else:
 			left_panel.offset_left = 6
 			left_panel.offset_right = 256
